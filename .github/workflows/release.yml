@@ -1,0 +1,49 @@
+name: Build & Release Executables
+
+on:
+  release:
+    types: [created]
+
+jobs:
+  build:
+    name: Build for ${{ matrix.os }}
+    runs-on: ${{ matrix.runner }}
+    strategy:
+      matrix:
+        include:
+          - os: macos
+            runner: macos-latest
+            ext: ""
+          - os: windows
+            runner: windows-latest
+            ext: ".exe"
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install pyinstaller websockets blessed python-dotenv
+
+      - name: Build with PyInstaller
+        run: |
+          pyinstaller --onefile client.py
+
+      - name: Rename binary
+        run: |
+          mv dist/game_client dist/game-client-${{ matrix.os }}${{ matrix.ext }}
+        shell: bash
+
+      - name: Upload binary to GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: dist/game-client-${{ matrix.os }}${{ matrix.ext }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
