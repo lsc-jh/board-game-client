@@ -4,6 +4,9 @@ on:
   release:
     types: [created]
 
+permissions:
+  contents: write
+
 jobs:
   build:
     name: Build for ${{ matrix.os }}
@@ -25,20 +28,18 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: "3.13"
+          python-version: "3.11"
 
       - name: Install dependencies
-        run: |
-          python -m pip install --upgrade pip
-          pip install pyinstaller websockets blessed python-dotenv
+        run: pip install -r requirements.txt
 
       - name: Build with PyInstaller
         run: |
-          pyinstaller --onefile client.py
+          pyinstaller --onefile game_client.py
 
       - name: Rename binary
         run: |
-          mv dist/client dist/game-client-${{ matrix.os }}${{ matrix.ext }}
+          mv dist/client${{ matrix.ext }} dist/game-client-${{ matrix.os }}${{ matrix.ext }}
         shell: bash
 
       - name: Upload binary to GitHub Release
