@@ -45,6 +45,10 @@ jobs:
           mv dist/client${{ matrix.ext }} board-game-client-${{ matrix.os }}${{ matrix.ext }}
         shell: bash
 
+      - name: Make binary executable (macOS)
+        if: matrix.os == 'macos'
+        run: chmod +x board-game-client-${{ matrix.os }}
+
       - name: Upload binary to GitHub Release
         uses: softprops/action-gh-release@v2
         with:
